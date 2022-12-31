@@ -1,0 +1,1 @@
+"""Package with chat app."""
