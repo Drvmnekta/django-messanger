@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% for user in user_list %}
+    {% for colname in user.column_set.all  %}
+        <p>{{colname}}</p>
+    {% endfor %}
+{% endfor %}
+
+<div class="container d-flex mt-5" style="width: 70%;">
+    <div class="col">
+        <table class="table table-striped mt-5">
+            <thead>
+                <tr>
+                    <th class="text-center" scope="col">Username</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for other_user in user_list %}
+                    {% if other_user != user %}
+                        <tr class="d-flex justify-content-between">
+                            <td class="ml-5"><a href="{% url 'chat:direct_chatbox' other_user.username %}">{{other_user.username}}</a>{% if other_user.unread %}<span class="count-not-read">{{ other_user.unread }}</span>{% endif %}</td>
+                            <td><a href="{% url 'chat:direct_delete' other_user.username %}">Delete</a></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<style>
+    .count-not-read {
+        margin-left: 20px;
+        width: fit-content;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background-color: #eff2f7;
+        color: #0a53be;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 12px;
+    }
+</style>
+
+{% endblock content %}
+{% block custom_js %}
+    <script src="{% static 'room_list.js' %}"></script>
+{% endblock %}

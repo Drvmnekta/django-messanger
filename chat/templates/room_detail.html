@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+        <input type="hidden" id="currentUser" name="currentUser" value="{{ user }}">
+
+        <div class="container mt-3 p-5">
+            {% if room.type == '2' %}
+                <h2>Комната: {{ room.name }}</h2>
+            {% endif %}
+            {% if room.type == '1' %}
+                <h2>{{ direct_user }} - Личные сообщения</h2>
+            {% endif %}
+            <div class="form-typing" id="formTyping"></div>
+            <div class="row">
+                <div class="col-12 col-md-8">
+                    <div class="mb-2">
+                        <div class="form-control chatlog" id="chatLog"></div>
+                         <button class="circle-not-read-message" id="circleNotReadMessage" onclick="onMessagesDownClick()">
+                            <div class="count-not-read-message" id="countNotReadMessage"></div>
+                            <div><i class="arrow down"></i></div>
+                         </button>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="chatMessageInput" placeholder="Введите сообщения" maxlength="1000">
+                        <div class="input-group-append">
+                            <button class="btn btn-success" id="chatMessageSend" type="button">Отправить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <h4>Участники</h4>
+                    <ul class="form-control" id="allUsersSelector">
+                        {% for participant in participants %}
+                            <li class="mx-3" data-username="{{ participant }}">{{ participant }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {{ room.name|json_script:"roomName" }}
+        </div>
+
+
+<style>
+    h2 {
+        margin: 0;
+    }
+
+    .chatlog {
+        height: 580px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .username {
+        color: #0a53be;
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    .form-control {
+        margin-right: 10px;
+    }
+
+    ul {
+        list-style-type: none;
+    }
+
+    li::marker {
+        color: #34c38f;
+    }
+
+    .notification {
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .body-message {
+        width: fit-content;
+        background-color: #b3deeb;
+        border-radius: 5px 5px 8px 1px;
+        margin: 3px auto 3px 0;
+        padding: 2px 8px;
+        font-size: 14px;
+        cursor: default;
+    }
+
+    .right {
+        text-align: right;
+        background-color: #b3ebc7;
+        border-radius: 5px 5px 1px 8px;
+        margin: 3px 0 3px auto;
+    }
+
+    .not-read {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 1px;
+        width: 100%;
+    }
+
+    .time {
+        color: grey;
+        font-size: 10px;
+        margin-left: 10px;
+    }
+
+    .form-typing {
+        height: 20px;
+        margin: 0 0 5px 3px;
+        color: #0a53be;
+        font-size: 13px;
+    }
+
+    .circle-not-read-message {
+        position: absolute;
+        right: 35px;
+        bottom: 60px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #0a53be;
+        text-align: center;
+        border: none;
+    }
+
+    .circle-not-read-message:hover {
+        background-color: #07439b;
+    }
+
+    .count-not-read-message {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: fit-content;
+        padding: 5px 8px;
+        border-radius: 20px;
+        background-color: #eff2f7;
+        color: #0a53be;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 12px;
+    }
+
+    .arrow {
+        margin-top: 50%;
+        border: solid #eff2f7;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
+    }
+
+    .down {
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+    }
+
+
+</style>
+
+{% endblock content %}
+
+{% block custom_js %}
+    <script src="{% static 'room_chatbox.js' %}"></script>
+{% endblock %}
