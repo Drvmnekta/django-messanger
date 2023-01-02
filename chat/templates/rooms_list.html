@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% for room in room_list %}
+    {% for colname in room.column_set.all  %}
+        <p>{{colname}}</p>
+    {% endfor %}
+{% endfor %}
+
+<div class="container d-flex mt-5" style="width: 70%;">
+    <div class="col">
+        <table class="table table-striped mt-5">
+            <thead>
+                <tr>
+                    <th class="text-lg-start" scope="col">Room Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in room_list %}
+                    <tr>
+                        <td class="ml-5"><a href="{% url 'chat:room_chatbox' room.name %}">{{room.name}}</a>{% if room.unread %}<span class="count-not-read">{{ room.unread }}</span>{% endif %}</td>
+                        <td><a href="{% url 'chat:room_update' room.name %} ">Update</a></td>
+                        <td><a href="{% url 'chat:room_delete' room.name %}">Delete</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-center">
+            <a href="{% url 'chat:room_create' %}" class="d-block btn btn-primary btn-lg my-5">Add new</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .count-not-read {
+        margin-left: 20px;
+        width: fit-content;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background-color: #eff2f7;
+        color: #0a53be;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 12px;
+    }
+</style>
+
+{% endblock content %}
+{% block custom_js %}
+    <script src="{% static 'room_list.js' %}"></script>
+{% endblock custom_js %}

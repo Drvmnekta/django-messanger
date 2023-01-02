@@ -1,0 +1,80 @@
+{% load fir_plugins %}
+{% load i18n %}
+{% load static %}
+{% load authorization %}
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8"/>
+    <title>ПК ПАУМР</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static "skote/assets/images/favicon.ico" %}">
+
+    <!-- Bootstrap Css -->
+    <link href="{% static "skote/assets/css/bootstrap.min.css" %}" id="bootstrap-style" rel="stylesheet"
+          type="text/css"/>
+    <!-- Icons Css -->
+    <link href="{% static "skote/assets/css/icons.min.css" %}" rel="stylesheet" type="text/css"/>
+    <!-- App Css-->
+    <link href="{% static "skote/assets/css/app.min.css" %}" id="app-style" rel="stylesheet" type="text/css"/>
+    {% block custom_js_top %}{% endblock %}
+    {% block custom_css %}{% endblock %}
+
+</head>
+
+<body data-topbar="dark" data-layout="horizontal">
+
+<!-- Begin page -->
+<div id="layout-wrapper">
+
+    {% include "parts/header.html" %}
+
+    {% include "parts/menu.html" %}
+
+
+    <!-- ============================================================== -->
+    <!-- Start right Content here -->
+    <!-- ============================================================== -->
+    <div class="main-content">
+
+        <div class="page-content">
+            <div class="container-fluid">
+
+                {% block broadcrumb %}{% endblock %}
+
+                <!-- end page title -->
+
+                {% block content %}{% endblock %}
+
+            </div> <!-- container-fluid -->
+        </div>
+        <!-- End Page-content -->
+
+
+        {% include "parts/footer.html" %}
+    </div>
+    <!-- end main content-->
+
+</div>
+<!-- END layout-wrapper -->
+
+
+<!-- JAVASCRIPT -->
+<script src="{% static "skote/assets/libs/jquery/jquery.min.js" %}"></script>
+<script src="{% static "skote/assets/libs/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+<script src="{% static "skote/assets/libs/metismenu/metisMenu.min.js" %}"></script>
+<script src="{% static "skote/assets/libs/simplebar/simplebar.min.js" %}"></script>
+<script src="{% static "skote/assets/libs/node-waves/waves.min.js" %}"></script>
+<script type="text/javascript" src="{% static "momentjs/moment.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/bootstrap-datetimepicker.min.js" %}"></script>
+
+<script src="{% static "skote/assets/js/app.js" %}"></script>
+<script type="text/javascript" src="{% static "custom_js/ajax.js" %}"></script>
+<script type="text/javascript" src="{% static "custom_js/auto_ajax.js" %}"></script>
+{% block custom_js %}{% endblock %}
+</body>
+</html>
