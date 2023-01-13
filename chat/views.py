@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
-
+from django.conf import settings
 from chat.models import Message, Room, RoomType
 
 User = get_user_model()
@@ -31,7 +31,7 @@ class RoomBaseView(LoginRequiredMixin):
         """
         if self.request.user.is_superuser:
             return Room.objects.all()
-        return Room.objects.filter(participant__in=[self.request.user])
+        return Room.objects.filter(participant__id=self.request.user.id)
 
     def get_object(self, queryset=None):
         """Get object for view.
@@ -67,7 +67,7 @@ class RoomListView(RoomBaseView, ListView):
         context = super().get_context_data(**kwargs)
         context['room_list'] = Room.objects.filter(type=RoomType.common_channel)
         for room in context['room_list']:
-            room.unread = Message.objects.filter(~Q(read_users__in=[self.request.user]), room=room).count()
+            room.unread = Message.objects.filter(~Q(read_users__id=self.request.user.id), room=room).count()
         return context
 
 
@@ -140,6 +140,19 @@ class RoomDeleteView(RoomBaseView, DeleteView):
 
     template_name = 'room_confirm_delete.html'
 
+    def delete(self, request, *args, **kwargs):
+        """Delete the object.
+
+        Args:
+            request: current request.
+
+        Returns:
+            redirect to success_url.
+        """
+        delete_object = self.get_object()
+        settings.REDIS_CLIENT.delete(f'{delete_object.name}_onlines')
+        return super().delete(request, *args, **kwargs)
+
 
 class DirectListView(LoginRequiredMixin, ListView):
     """View for list of direct messages chats."""
@@ -159,15 +172,14 @@ class DirectListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['room_list'] = Room.objects.filter(type=RoomType.common_channel)
         for user in context['user_list']:
-            try:
+            if Room.objects.filter(name=f'__{self.request.user.username}_{user.username}_direct__').exists():
                 direct_room = Room.objects.get(name=f'__{self.request.user.username}_{user.username}_direct__')
-            except ObjectDoesNotExist:
-                try:
-                    direct_room = Room.objects.get(name=f'__{user.username}_{self.request.user.username}_direct__')
-                except ObjectDoesNotExist:
-                    user.unread = 0
-                    continue
-            user.unread = Message.objects.filter(~Q(read_users__in=[self.request.user]), room=direct_room).count()
+            elif Room.objects.filter(name=f'__{user.username}_{self.request.user.username}_direct__').exists():
+                direct_room = Room.objects.get(name=f'__{user.username}_{self.request.user.username}_direct__')
+            else:
+                user.unread = 0
+                continue
+            user.unread = Message.objects.filter(~Q(read_users__id=self.request.user.id), room=direct_room).count()
         return context
 
 
@@ -190,17 +202,16 @@ class DirectDetailView(View, LoginRequiredMixin):
         second_user = get_object_or_404(User, username=self.kwargs.get('username'))
         if first_user == second_user:
             raise PermissionDenied
-        try:
+        if Room.objects.filter(name=f'__{first_user.username}_{second_user.username}_direct__').exists():
             room = Room.objects.get(name=f'__{first_user.username}_{second_user.username}_direct__')
-        except ObjectDoesNotExist:
-            try:
-                room = Room.objects.get(name=f'__{second_user.username}_{first_user.username}_direct__')
-            except ObjectDoesNotExist:
-                room = Room.objects.create(
-                    type=RoomType.direct_messages,
-                    name=f'__{first_user.username}_{second_user.username}_direct__',
-                )
-                room.participant.add(first_user.id, second_user.id)
+        elif Room.objects.filter(name=f'__{second_user.username}_{first_user.username}_direct__').exists():
+            room = Room.objects.get(name=f'__{second_user.username}_{first_user.username}_direct__')
+        else:
+            room = Room.objects.create(
+                type=RoomType.direct_messages,
+                name=f'__{first_user.username}_{second_user.username}_direct__',
+            )
+            room.participant.add(first_user.id, second_user.id)
         return redirect('chat:room_chatbox', room_name=room.name)
 
 
@@ -223,11 +234,10 @@ class DirectDeleteView(View, LoginRequiredMixin):
         second_user = get_object_or_404(User, username=self.kwargs.get('username'))
         if first_user == second_user:
             raise PermissionDenied
-        try:
+        if Room.objects.filter(name=f'__{first_user.username}_{second_user.username}_direct__').exists():
             room = Room.objects.get(name=f'__{first_user.username}_{second_user.username}_direct__')
-        except ObjectDoesNotExist:
-            try:
-                room = Room.objects.get(name=f'__{second_user.username}_{first_user.username}_direct__')
-            except ObjectDoesNotExist:
-                return redirect('chat:room_list')
+        elif Room.objects.filter(name=f'__{second_user.username}_{first_user.username}_direct__').exists():
+            room = Room.objects.get(name=f'__{second_user.username}_{first_user.username}_direct__')
+        else:
+            return redirect('chat:room_list')
         return redirect('chat:room_delete', room_name=room.name)

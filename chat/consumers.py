@@ -4,7 +4,7 @@ import json
 from contextlib import suppress
 from datetime import datetime
 from itertools import chain
-
+from django.conf import settings
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.db.models import Q
@@ -24,6 +24,10 @@ class ChatConsumer(WebsocketConsumer):
         self.room_group_name = None
         self.room = None
         self.user = None
+        self.unread_count = 0
+        self.start_msgs = None
+        self.down_zero_msg_id = 0
+        self.up_zero_msg_id = 0
 
     def get_start_messages(self, room_name):
         """Get messages for start with chatbox.
@@ -35,7 +39,7 @@ class ChatConsumer(WebsocketConsumer):
             List with messages data to render.
         """
         room_messages = Message.objects.filter(room__name=room_name)
-        all_unread_msgs = room_messages.filter(~Q(read_users__in=[self.scope['user']])).order_by('id')
+        all_unread_msgs = room_messages.filter(~Q(read_users__id=self.scope['user'].id)).order_by('id')
         unread_to_paginate = 0
         for msg in all_unread_msgs:
             msg.read = False
@@ -44,7 +48,7 @@ class ChatConsumer(WebsocketConsumer):
             unread_to_paginate = len(all_unread_msgs) - MESSAGES_PAGINATE
         elif all_unread_msgs and MESSAGES_PAGINATE > len(all_unread_msgs):
             need_msgs_amount = MESSAGES_PAGINATE - len(all_unread_msgs)
-            old_msgs = room_messages.filter(Q(read_users__in=[self.scope['user']])).order_by('-id')[:need_msgs_amount]
+            old_msgs = room_messages.filter(Q(read_users__id=self.scope['user'].id)).order_by('-id')[:need_msgs_amount]
             for msg in old_msgs:
                 msg.read = msg.read_users.count() != 1
             start_msgs = sorted(
@@ -77,7 +81,7 @@ class ChatConsumer(WebsocketConsumer):
         Returns:
             List with message data to render.
         """
-        all_unread_msgs = Message.objects.filter(~Q(read_users__in=[self.scope['user']]), room=self.room).count()
+        all_unread_msgs = Message.objects.filter(~Q(read_users__id=self.scope['user'].id), room=self.room).count()
         if all_unread_msgs - MESSAGES_PAGINATE < 0:
             all_unread_msgs = 0
         else:
@@ -86,7 +90,7 @@ class ChatConsumer(WebsocketConsumer):
         end_paginate = self.down_zero_msg_id + (MESSAGES_PAGINATE * page)
         messages = Message.objects.filter(Q(id__gte=start_paginate, id__lte=end_paginate), room=self.room)[::-1]
         for msg in messages:
-            msg.read = Message.objects.filter(pk=msg.id, read_users__in=[self.scope['user']]).exists()
+            msg.read = Message.objects.filter(pk=msg.id, read_users__id=self.scope['user'].id).exists()
         return messages, all_unread_msgs
 
     def get_paginate_up(self, page):
@@ -104,41 +108,17 @@ class ChatConsumer(WebsocketConsumer):
             end_paginate = 1
         messages = Message.objects.filter(Q(id__lte=start_paginate, id__gte=end_paginate), room=self.room)
         for msg in messages:
-            msg.read = Message.objects.filter(pk=msg.id, read_users__in=[self.scope['user']]).exists()
+            msg.read = Message.objects.filter(pk=msg.id, read_users__id=self.scope['user'].id).exists()
         return messages
-
-    def get_online_users(self):
-        """Get list of users online.
-
-        Returns:
-            list of users online.
-        """
-        online_users = OnlineUser.objects.all()
-        return [online_user.user.username for online_user in online_users]
-
-    def add_online_user(self, user):
-        """Add user to online users list.
-
-        Args:
-            user: username of the user to add.
-        """
-        with suppress(Exception):
-            OnlineUser.objects.create(user=user)
-
-    def delete_online_user(self, user):
-        """Remove user from online users list.
-
-        Args:
-            user: username of the user to remove.
-        """
-        with suppress(Exception):
-            OnlineUser.objects.get(user=user).delete()
 
     def send_online_user_list(self):
         """Send list of users online."""
-        online_user_list = self.get_online_users()
+        online_user_list = settings.REDIS_CLIENT.smembers(f'{self.room_name}_onlines')
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {'type': 'online_users', 'users': online_user_list},
+            self.room_group_name, {
+                'type': 'online_users',
+                'users': [username.decode('utf-8') for username in online_user_list],
+            },
         )
 
     def connect(self):
@@ -176,7 +156,7 @@ class ChatConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {'type': 'user_join', 'user': self.user.username},
         )
-        self.add_online_user(self.user)
+        settings.REDIS_CLIENT.sadd(f'{self.room_name}_onlines', bytes(self.user.username, 'utf-8'))
         self.send_online_user_list()
 
     def disconnect(self, close_code):
@@ -190,7 +170,7 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name, {'type': 'user_leave', 'user': self.user.username},
         )
 
-        self.delete_online_user(self.user)
+        settings.REDIS_CLIENT.srem(f'{self.room_name}_onlines', bytes(self.user.username, 'utf-8'))
         self.send_online_user_list()
 
     def receive(self, text_data=None, bytes_data=None):

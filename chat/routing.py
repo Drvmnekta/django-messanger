@@ -1,9 +1,10 @@
 """Module with routing."""
 
-from django.urls import path
+from channels.routing import URLRouter
+from django.urls import re_path
 
-from chat import consumers
+from paumr.chat import consumers
 
-websocket_urlpatterns = [
-    path('ws/chat/<str:room_name>/', consumers.ChatConsumer.as_asgi()),
-]
+url_router = URLRouter([
+    re_path(r'^ws/chat/(?P<room_name>.+)/$', consumers.ChatConsumer.as_asgi()),
+])

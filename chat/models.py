@@ -100,17 +100,3 @@ class Message(models.Model):
             Author of the message, its content and date created.
         """
         return f'{self.user.username}: {self.text} [{self.timestamp}]'
-
-
-class OnlineUser(models.Model):
-    """Class for tracking users online."""
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        """Return string representation of the OnlineUser model.
-
-        Returns:
-            Username of the user online.
-        """
-        return self.user.username

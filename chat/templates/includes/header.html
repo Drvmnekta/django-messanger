@@ -1,0 +1,120 @@
+<header id="page-topbar">
+    <div class="navbar-header">
+        <div class="d-flex">
+            <!-- LOGO -->
+            <div class="navbar-brand-box">
+                <a href="/" class="logo logo-dark">
+                                <span class="logo-sm">
+                                    Messanger
+                                </span>
+                    <span class="logo-lg">
+                                    Messanger
+                                </span>
+                </a>
+
+                <a href="{% url 'chat:room_list' %}" class="logo logo-light">
+                                <span class="logo-sm">
+                                    <div class="text-white-50" style="font-weight: 600;font-size: 16px">Messanger</div>
+                                </span>
+                    <span class="logo-lg">
+                        <div class="text-white-50" style="font-weight: 600;font-size: 16px">Messanger</div>
+                                </span>
+                </a>
+            </div>
+
+            <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light"
+                    data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
+                <i class="fa fa-fw fa-bars"></i>
+            </button>
+
+
+
+        </div>
+
+        <div class="d-flex">
+            <div class="dropdown d-inline-block d-lg-none ml-2">
+                <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="mdi mdi-magnify"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                     aria-labelledby="page-header-search-dropdown">
+
+                    <form class="p-3">
+                        <div class="form-group m-0">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search ..."
+                                       aria-label="Search input">
+
+                                <button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i></button>
+
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+            <div class="dropdown d-none d-lg-inline-block ml-1">
+                <button type="button" class="btn header-item noti-icon waves-effect" data-toggle="fullscreen">
+                    <i class="bx bx-fullscreen"></i>
+                </button>
+            </div>
+
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn header-item noti-icon waves-effect"
+                        id="page-header-notifications-dropdown"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="bx bx-bell bx-tada"></i>
+                    <span class="badge bg-danger rounded-pill">3</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                     aria-labelledby="page-header-notifications-dropdown">
+                    <div class="p-3">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h6 class="m-0" key="t-notifications"> Notifications </h6>
+                            </div>
+                            <div class="col-auto">
+                                <a href="#!" class="small" key="t-view-all"> View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-2 border-top d-grid">
+                        <a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)">
+                            <i class="mdi mdi-arrow-right-circle me-1"></i> <span key="t-view-more">View More..</span>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                    <span class="d-none d-xl-inline-block ms-1" key="t-henry">{{ user }}</span>
+                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <!-- item-->
+                    <a class="dropdown-item" href="{% url 'user:profile' %}"><i
+                            class="bx bx-user font-size-16 align-middle me-1"></i> <span
+                            key="t-profile">Профиль</span></a>
+
+                    {% if user.is_staff %}
+                        <a class="dropdown-item" href="{% url 'admin:index' %}"><i
+                            class="bx bx-user-plus font-size-16 align-middle me-1"></i> <span
+                            key="t-admin">Администрирование</span></a>
+
+                    {% endif %}
+
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="{% url 'logout' %}"><i
+                            class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> <span
+                            key="t-logout">Выход</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
