@@ -26,7 +26,7 @@ https://github.com/Kseniya8
 
 ### Использованные технологии
 - WebSocket: DjangoChannels
-- DB: SQLite
+- DB: SQLite, RedisDB
 - Back: Django, python
 - Front: HTML5, нативный JS, CSS, bootstrap
 
