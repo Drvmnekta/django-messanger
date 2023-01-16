@@ -1,11 +1,11 @@
 import os
 
 from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.routing import ProtocolTypeRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 
-from chat.routing import websocket_urlpatterns
+from chat.routing import url_router
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'messenger.settings')
 

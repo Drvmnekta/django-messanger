@@ -1,7 +1,6 @@
 """Module with websocket consumers for chat app."""
 
 import json
-from contextlib import suppress
 from datetime import datetime
 from itertools import chain
 from django.conf import settings
@@ -9,7 +8,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.db.models import Q
 
-from chat.models import Message, OnlineUser, Room
+from chat.models import Message, Room
 
 MESSAGES_PAGINATE = 20
 
