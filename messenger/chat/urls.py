@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from chat import views
+from messenger.chat import views
 
 urlpatterns = [
     path('', views.RoomListView.as_view(), name='room_list'),

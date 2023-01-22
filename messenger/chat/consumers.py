@@ -8,7 +8,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.db.models import Q
 
-from chat.models import Message, Room
+from messenger.chat.models import Message, Room
 
 MESSAGES_PAGINATE = 20
 

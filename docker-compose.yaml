@@ -1,0 +1,44 @@
+version: "3.10"
+
+volumes:
+  pg_volume:
+  static_volume:
+  media_volume:
+
+networks:
+  pg_network:
+  redis_network:
+
+services:
+  db:
+    image: "postgres:alpine"
+    container_name: "messenger_db"
+#    env_file:
+#      - envs/pg.env
+    volumes:
+      - pg_volume:/var/lib/postgresql/data
+    networks:
+      - pg_network
+    ports:
+      - "5000:5432"
+  redis:
+    image: "redis:alpine"
+    container_name: "messenger_redis"
+    networks:
+      - redis_network
+  web:
+    build: .
+    container_name: "messenger_web"
+#    env_file:
+#      - envs/web.env
+    volumes:
+      - static_volume:/opt/static
+      - media_volume:/opt/media
+    networks:
+      - pg_network
+      - redis_network
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"

@@ -4,7 +4,7 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import chat.models
+import messenger.chat.models
 
 
 class Migration(migrations.Migration):
@@ -20,7 +20,8 @@ class Migration(migrations.Migration):
             name='Room',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128, unique=True, validators=[chat.models.validate_room_name])),
+                ('name', models.CharField(max_length=128, unique=True, validators=[
+                    messenger.chat.models.validate_room_name])),
                 ('type', models.CharField(choices=[('1', 'Direct Messages'), ('2', 'Common Channel')], max_length=2)),
                 ('participant', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
             ],

@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from chat.models import Message, Room
+from messenger.chat.models import Message, Room
 
 
 @admin.register(Room)

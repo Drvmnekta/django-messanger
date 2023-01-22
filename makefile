@@ -2,19 +2,22 @@ install:
 	poetry install --no-root
 
 run:
-	python3 manage.py runserver
+	python3 messenger.manage.py runserver
 
 migrate:
-	python3 manage.py migrate
+	python3 messenger.manage.py migrate
 
 lint:
-	poetry run flake8 .
+	poetry run flake8 messenger
 
 mami:
-	python3 manage.py makemigrations
+	python3 messenger.manage.py makemigrations
 
 locale:
-	python3 manage.py compilemessages
+	python3 messenger.manage.py compilemessages
 
 run-0:
-	python3 manage.py runserver 0.0.0.0:8000
+	python3 messenger.manage.py runserver 0.0.0.0:8000
+
+collectstatic:
+	python3 -m messenger.manage collectstatic -n

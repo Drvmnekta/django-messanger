@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "django-messanger"
+name = "messanger"
 version = "0.1.0"
 description = ""
 authors = ["Drvmnekta <nataliakamysheva@mail.ru>"]
 readme = "README.md"
-packages = [{include = "django_messanger"}]
+packages = [{include = "messenger"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
